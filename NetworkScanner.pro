@@ -29,3 +29,10 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../usr/local/Cellar/libtins/4.2_1/lib/release/ -ltins.4.2
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../usr/local/Cellar/libtins/4.2_1/lib/debug/ -ltins.4.2
+else:unix: LIBS += -L$$PWD/../../../../usr/local/Cellar/libtins/4.2_1/lib/ -ltins.4.2
+
+INCLUDEPATH += $$PWD/../../../../usr/local/Cellar/libtins/4.2_1/include
+DEPENDPATH += $$PWD/../../../../usr/local/Cellar/libtins/4.2_1/include

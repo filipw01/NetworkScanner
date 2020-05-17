@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <tins/tins.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,6 +15,28 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+private slots:
+
+    // void getRoutingTable();
+
+    // void getArpTable();
+
+    // void ScanPorts();
+
+    // void getMacByIp();
+
+    // void getIpByMac();
+
+    // void getHostname();
+
+    // void getOS();
+
+    // void getSpeedtest();
+
+    // void getWhoIs();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
