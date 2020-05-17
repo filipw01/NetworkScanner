@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QScrollArea>
 
 using namespace Tins;
 
@@ -10,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QWidget* widget = new QWidget(ui->scrollArea);
+    QWidget* widget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
     for (const NetworkInterface& iface : NetworkInterface::all()){
         QWidget* ifaceWidget = createNetworkCardWidget(iface, widget);
@@ -19,6 +20,11 @@ MainWindow::MainWindow(QWidget *parent)
     };
     widget->setLayout(layout);
     widget->show();
+
+    QScrollArea* scrollArea = new QScrollArea();
+    scrollArea->setWidget(widget);
+
+    this->setCentralWidget(scrollArea);
 }
 
 
@@ -29,6 +35,9 @@ MainWindow::~MainWindow()
 
 QWidget* MainWindow::createNetworkCardWidget(NetworkInterface iface, QWidget* parent){
     QWidget* widget = new QWidget(parent);
+
+    QLabel* name = new QLabel;
+    name->setText(QString::fromStdString("Nazwa: " + iface.name()));
 
     QLabel* mac = new QLabel;
     mac->setText(QString::fromStdString("Adres MAC: " + iface.info().hw_addr.to_string()));
@@ -47,6 +56,7 @@ QWidget* MainWindow::createNetworkCardWidget(NetworkInterface iface, QWidget* pa
     status->setText(QString::fromStdString("Stan karty: " + statusText));
 
     QVBoxLayout* layout = new QVBoxLayout;
+    layout->addWidget(name);
     layout->addWidget(mac);
     layout->addWidget(ipv4);
     layout->addWidget(netmask);
