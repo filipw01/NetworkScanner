@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QVBoxLayout>
+#include <QLabel>
 
 using namespace Tins;
 
@@ -8,6 +10,15 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QWidget* widget = new QWidget(ui->scrollArea);
+    QVBoxLayout* layout = new QVBoxLayout;
+    for (const NetworkInterface& iface : NetworkInterface::all()){
+        QWidget* ifaceWidget = createNetworkCardWidget(iface, widget);
+        layout->addWidget(ifaceWidget);
+        ifaceWidget->show();
+    };
+    widget->setLayout(layout);
+    widget->show();
 }
 
 
@@ -16,17 +27,32 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QWidget* MainWindow::createNetworkCardWidget(NetworkInterface iface, QWidget* parent){
+    QWidget* widget = new QWidget(parent);
 
-void MainWindow::on_pushButton_clicked()
-{
-    for (const NetworkInterface& iface : NetworkInterface::all()){
-        if(iface.info().is_up && iface.info().hw_addr.to_string() != "00:00:00:00:00:00" && iface.info().ip_addr.to_string() != "0.0.0.0"){
-            ui->mac->setText(QString::fromStdString(iface.info().hw_addr.to_string()));
-            ui->ipv4->setText(QString::fromStdString(iface.info().ip_addr.to_string()));
-            ui->netmask->setText(QString::fromStdString(iface.info().netmask.to_string()));
-            ui->broadcast->setText(QString::fromStdString(iface.info().bcast_addr.to_string()));
-            ui->status->setText(QString::fromStdString(std::to_string(iface.info().is_up)));
-        }
-    }
+    QLabel* mac = new QLabel;
+    mac->setText(QString::fromStdString("Adres MAC: " + iface.info().hw_addr.to_string()));
 
+    QLabel* ipv4 = new QLabel;
+    ipv4->setText(QString::fromStdString("Adres IP: " + iface.info().ip_addr.to_string()));
+
+    QLabel* netmask = new QLabel;
+    netmask->setText(QString::fromStdString("Maska: " + iface.info().netmask.to_string()));
+
+    QLabel* broadcast = new QLabel;
+    broadcast->setText(QString::fromStdString("Adres rozgłoszeniowy: " + iface.info().bcast_addr.to_string()));
+
+    QLabel* status = new QLabel;
+    std::string statusText = iface.info().is_up ? "Włączona" : "Wyłączona";
+    status->setText(QString::fromStdString("Stan karty: " + statusText));
+
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->addWidget(mac);
+    layout->addWidget(ipv4);
+    layout->addWidget(netmask);
+    layout->addWidget(broadcast);
+    layout->addWidget(status);
+
+    widget->setLayout(layout);
+    return widget;
 }

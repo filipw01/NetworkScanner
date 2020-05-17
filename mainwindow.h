@@ -18,6 +18,8 @@ public:
 
 private slots:
 
+    QWidget* createNetworkCardWidget(Tins::NetworkInterface iface, QWidget* parent);
+
     // void getRoutingTable();
 
     // void getArpTable();
@@ -35,8 +37,6 @@ private slots:
     // void getSpeedtest();
 
     // void getWhoIs();
-
-    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
