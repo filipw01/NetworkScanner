@@ -21,10 +21,17 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(layout);
     widget->show();
 
-    QScrollArea* scrollArea = new QScrollArea();
+    QWidget* widget2 = new QWidget;
+
+    QScrollArea* scrollArea = new QScrollArea;
     scrollArea->setWidget(widget);
 
-    this->setCentralWidget(scrollArea);
+    QTabWidget* tabWidget = new QTabWidget(this);
+    tabWidget->addTab(scrollArea, "localhost");
+    tabWidget->addTab(widget2, "tab2");
+    tabWidget->show();
+
+    this->setCentralWidget(tabWidget);
 }
 
 
