@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     QWidget* widget = new QWidget;
+    QWidget* whoIsWidget = new QWidget;
+    QWidget* speedTestWidget = new QWidget;
+
     QVBoxLayout* layout = new QVBoxLayout;
     for (const NetworkInterface& iface : NetworkInterface::all()){
         QWidget* ifaceWidget = createNetworkCardWidget(iface, widget);
@@ -21,14 +24,14 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(layout);
     widget->show();
 
-    QWidget* widget2 = new QWidget;
 
     QScrollArea* scrollArea = new QScrollArea;
     scrollArea->setWidget(widget);
 
     QTabWidget* tabWidget = new QTabWidget(this);
-    tabWidget->addTab(scrollArea, "localhost");
-    tabWidget->addTab(widget2, "tab2");
+    tabWidget->addTab(scrollArea, "Localhost");
+    tabWidget->addTab(whoIsWidget, "Who is");
+    tabWidget->addTab(speedTestWidget, "Speed Test");
     tabWidget->show();
 
     this->setCentralWidget(tabWidget);
