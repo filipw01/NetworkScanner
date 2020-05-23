@@ -38,3 +38,45 @@ ARP::hwaddress_type Host::getMac() const{
 std::vector<int> Host::getPorts() const{
     return open_ports;
 }
+
+void Host::check_availability(){
+    NetworkInterface iface = NetworkInterface::default_interface();
+    NetworkInterface::Info iface_addresses = iface.addresses();
+    PacketSender sender;
+    EthernetII icmp_request = EthernetII("ff:ff:ff:ff:ff:ff",iface_addresses.hw_addr) / IP(ip_address,iface_addresses.ip_addr) / ICMP();
+    std::unique_ptr<PDU> icmp_response(sender.send_recv(icmp_request, iface));
+    if (icmp_response){
+		active = true;
+    }
+}
+
+void Host::check_mac(){
+    NetworkInterface iface = NetworkInterface::default_interface();
+    NetworkInterface::Info iface_addresses = iface.addresses();
+    PacketSender sender;
+    EthernetII arp_request = ARP::make_arp_request(ip_address, iface_addresses.ip_addr, iface_addresses.hw_addr);
+    std::unique_ptr<PDU> arp_response(sender.send_recv(arp_request, iface));
+    if (arp_response) {
+        const ARP &arp = arp_response->rfind_pdu<ARP>();
+        mac_address = arp.sender_hw_addr();
+    }
+}
+
+void Host::scan_ports(std::vector<int> ports){
+    if (ports.size() > 0){
+        NetworkInterface iface = NetworkInterface::default_interface();
+        NetworkInterface::Info iface_addresses = iface.addresses();
+        PacketSender sender;
+		for (const int &port : ports){
+			IP tcp_request = IP(ip_address) / TCP(port,64738);
+			tcp_request.rfind_pdu<TCP>().set_flag(TCP::SYN,1);
+			std::unique_ptr<PDU> tcp_response(sender.send_recv(tcp_request));
+			if (tcp_response){
+				TCP &tcp = tcp_response->rfind_pdu<TCP>();
+				if (!tcp.get_flag(TCP::RST)){
+					open_ports.push_back(port);
+				}
+			}
+		}
+	}
+}

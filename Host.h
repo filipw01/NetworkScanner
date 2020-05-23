@@ -5,10 +5,10 @@
 using namespace Tins;
 
 class Host{
-    bool active = false; // host availability in network
-    IPv4Address ip_address;
-    ARP::hwaddress_type mac_address;
-    std::vector<int> open_ports;
+    bool active = false; /*!< Informacja o dostępności hosta w sieci */
+    IPv4Address ip_address; /*!< Adres ip hosta */
+    ARP::hwaddress_type mac_address; /*!< Adres mac hosta */
+    std::vector<int> open_ports; /*!< Otwarte porty sieciowe */
 
 public:
     Host() = default;
@@ -23,4 +23,16 @@ public:
     IPv4Address getIp() const;
     ARP::hwaddress_type getMac() const;
     std::vector<int> getPorts() const;
+
+    //! Metoda sprawdzająca dostępność hosta w sieci
+    void check_availability();
+
+    //! Metoda sprawdzająca adres mac hosta
+    void check_mac();
+
+    //! Metoda sprawdzająca adres mac hosta
+    /*!
+    \param ports argument typu wektorowego, przekazujący numery portów do sprawdzenia
+    */
+    void scan_ports(std::vector<int> ports);
 };
