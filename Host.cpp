@@ -1,6 +1,6 @@
 #include "Host.h"
 
-Host::Host(bool Active, IPv4Address Ip_address, std::string Mac_address, std::vector<int> Open_ports){
+Host::Host(bool Active, IPv4Address Ip_address, ARP::hwaddress_type Mac_address, std::vector<int> Open_ports){
     active = Active;
     ip_address = Ip_address;
     mac_address = Mac_address;
@@ -15,7 +15,7 @@ void Host::setIp_address(IPv4Address Ip_address){
     ip_address = Ip_address;
 }
 
-void Host::setMac_address(std::string Mac_address){
+void Host::setMac_address(ARP::hwaddress_type Mac_address){
     mac_address = Mac_address;
 }
 
@@ -31,7 +31,7 @@ IPv4Address Host::getIp() const{
     return ip_address;
 }
 
-std::string Host::getMac() const{
+ARP::hwaddress_type Host::getMac() const{
     return mac_address;
 }
 
