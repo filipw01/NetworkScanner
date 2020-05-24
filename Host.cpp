@@ -1,8 +1,13 @@
 #include "Host.h"
 
-Host::Host(bool Active, IPv4Address Ip_address, ARP::hwaddress_type Mac_address, std::vector<int> Open_ports){
+Host::Host(IPv4Address Ip_address){
+    ip_address = Ip_address;
+}
+
+Host::Host(bool Active, IPv4Address Ip_address, std::string Os_type, ARP::hwaddress_type Mac_address, std::vector<int> Open_ports){
     active = Active;
     ip_address = Ip_address;
+    os_type = Os_type;
     mac_address = Mac_address;
     open_ports = Open_ports;
 }
@@ -13,6 +18,10 @@ void Host::setActive(bool Active){
 
 void Host::setIp_address(IPv4Address Ip_address){
     ip_address = Ip_address;
+}
+
+void Host::setOs_type(std::string Os_type){
+    os_type = Os_type;
 }
 
 void Host::setMac_address(ARP::hwaddress_type Mac_address){
@@ -31,6 +40,10 @@ IPv4Address Host::getIp() const{
     return ip_address;
 }
 
+std::string Host::getOs() const{
+    return os_type;
+}
+
 ARP::hwaddress_type Host::getMac() const{
     return mac_address;
 }
@@ -47,6 +60,14 @@ void Host::check_availability(){
     std::unique_ptr<PDU> icmp_response(sender.send_recv(icmp_request, iface));
     if (icmp_response){
 		active = true;
+        const IP &ip = icmp_response->rfind_pdu<IP>();
+        uint8_t ttl = ip.ttl();
+        if (ttl == 64){
+            os_type = "Unix";
+        }
+        else if (ttl == 128){
+            os_type = "Windows";
+        }
     }
 }
 
