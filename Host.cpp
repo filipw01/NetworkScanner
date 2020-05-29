@@ -84,20 +84,33 @@ void Host::check_mac(){
 }
 
 void Host::scan_ports(std::vector<int> ports){
+    NetworkInterface iface = NetworkInterface::default_interface();
+    NetworkInterface::Info iface_addresses = iface.addresses();
+    PacketSender sender;
     if (ports.size() > 0){
-        NetworkInterface iface = NetworkInterface::default_interface();
-        NetworkInterface::Info iface_addresses = iface.addresses();
-        PacketSender sender;
-		for (const int &port : ports){
-			IP tcp_request = IP(ip_address) / TCP(port,64738);
-			tcp_request.rfind_pdu<TCP>().set_flag(TCP::SYN,1);
-			std::unique_ptr<PDU> tcp_response(sender.send_recv(tcp_request));
-			if (tcp_response){
-				TCP &tcp = tcp_response->rfind_pdu<TCP>();
-				if (!tcp.get_flag(TCP::RST)){
-					open_ports.push_back(port);
-				}
-			}
-		}
-	}
+        for (const int &port : ports){
+            IP tcp_request = IP(ip_address) / TCP(port,64738);
+            tcp_request.rfind_pdu<TCP>().set_flag(TCP::SYN,1);
+            std::unique_ptr<PDU> tcp_response(sender.send_recv(tcp_request));
+            if (tcp_response){
+                TCP &tcp = tcp_response->rfind_pdu<TCP>();
+                if (!tcp.get_flag(TCP::RST)){
+                    open_ports.push_back(port);
+                }
+            }
+        }
+    }
+    else{
+        for (int port=1; port<=65535; port++){
+            IP tcp_request = IP(ip_address) / TCP(port,64738);
+            tcp_request.rfind_pdu<TCP>().set_flag(TCP::SYN,1);
+            std::unique_ptr<PDU> tcp_response(sender.send_recv(tcp_request));
+            if (tcp_response){
+                TCP &tcp = tcp_response->rfind_pdu<TCP>();
+                if (!tcp.get_flag(TCP::RST)){
+                    open_ports.push_back(port);
+                }
+            }
+        }
+    }
 }
