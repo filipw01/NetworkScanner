@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QScrollArea>
+#include <QCheckBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,5 +51,9 @@ private:
     QWidget* networkScanWidget;
     QScrollArea* networkScanScrollArea;
     QTabWidget* tabWidget;
+    QCheckBox* checkboxOs;
+    QCheckBox* checkboxMac;
+    QCheckBox* checkboxActive;
+    QCheckBox* checkboxPorts;
 };
 #endif // MAINWINDOW_H

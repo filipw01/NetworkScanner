@@ -6,6 +6,7 @@
 #include <QScrollArea>
 #include <QTextEdit>
 #include <QPushButton>
+#include <QCheckBox>
 
 using namespace Tins;
 
@@ -33,10 +34,28 @@ MainWindow::MainWindow(QWidget *parent)
     field = new QTextEdit;
     field->setFixedHeight(26);
     QPushButton* button = new QPushButton;
-    button->setText("Przeskanuj otwarte porty");
-            connect(button, SIGNAL (clicked()),this, SLOT (handleClick()));
+    button->setText("Przeskanuj hosta");
+    connect(button, SIGNAL (clicked()),this, SLOT (handleClick()));
+
+    checkboxOs = new QCheckBox;
+    checkboxMac = new QCheckBox;
+    checkboxActive = new QCheckBox;
+    checkboxPorts= new QCheckBox;
+    checkboxOs->setChecked(true);
+    checkboxMac->setChecked(true);
+    checkboxActive->setChecked(true);
+    checkboxPorts->setChecked(true);
+    checkboxOs->setText("Pokaż system operacyjny");
+    checkboxMac->setText("Pokaż adres MAC");
+    checkboxActive->setText("Pokaż czy aktywny w sieci");
+    checkboxPorts->setText("Pokaż otwarte porty");
+
     networkScanLayout->addWidget(field);
     networkScanLayout->addWidget(button);
+    networkScanLayout->addWidget(checkboxOs);
+    networkScanLayout->addWidget(checkboxMac);
+    networkScanLayout->addWidget(checkboxActive);
+    networkScanLayout->addWidget(checkboxPorts);
     networkScanWidget->setLayout(networkScanLayout);
     networkScanWidget->setFixedHeight(500);
     networkScanWidget->show();
@@ -95,24 +114,35 @@ void MainWindow::handleClick(){
     QLabel* label = new QLabel;
     try {
         Host* host = new Host(IPv4Address(fieldValue));
-        host->scan_ports({});
-        std::vector<int> ports = host->getPorts();
         std::string labelText = "Adres hosta: ";
         labelText += host->getIp().to_string();
-        labelText += "\nSystem operacyjny: ";
-        labelText += host->getOs();
-        labelText += "\nAdres MAC: ";
-        labelText += host->getMac().to_string();
-        labelText += "\nAktywny w sieci: ";
-        if(host->getActive()){
-            labelText += "tak";
-        }else{
-            labelText += "nie";
+        if(checkboxOs->isChecked()){
+            labelText += "\nSystem operacyjny: ";
+            host->check_availability();
+            labelText += host->getOs();
         }
-        labelText += "\nOtwarte porty:";
-        for (const int port : ports) {
-            labelText+=std::to_string(port);
-            labelText+=", ";
+        if(checkboxMac->isChecked()){
+            labelText += "\nAdres MAC: ";
+            host->check_mac();
+            labelText += host->getMac().to_string();
+        }
+        if(checkboxActive->isChecked()){
+            labelText += "\nAktywny w sieci: ";
+            host->check_availability();
+            if(host->getActive()){
+                labelText += "tak";
+            }else{
+                labelText += "nie";
+            }
+        }
+        if(checkboxPorts->isChecked()){
+            host->scan_ports({});
+            std::vector<int> ports = host->getPorts();
+            labelText += "\nOtwarte porty:";
+            for (const int port : ports) {
+                labelText+=std::to_string(port);
+                labelText+=", ";
+            }
         }
         label->setText(QString::fromStdString(labelText));
         networkScanLayout->addWidget(label);
