@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <tins/tins.h>
+#include <QVBoxLayout>
+#include <QTextEdit>
+#include <QScrollArea>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,6 +22,8 @@ public:
 private slots:
 
     QWidget* createNetworkCardWidget(Tins::NetworkInterface iface, QWidget* parent);
+
+    void handleClick();
 
     // void getRoutingTable();
 
@@ -40,5 +45,10 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QVBoxLayout* networkScanLayout;
+    QTextEdit* field;
+    QWidget* networkScanWidget;
+    QScrollArea* networkScanScrollArea;
+    QTabWidget* tabWidget;
 };
 #endif // MAINWINDOW_H

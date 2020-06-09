@@ -1,37 +1,50 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "Host.h"
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
+#include <QTextEdit>
+#include <QPushButton>
 
 using namespace Tins;
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QWidget* widget = new QWidget;
-    QWidget* whoIsWidget = new QWidget;
-    QWidget* speedTestWidget = new QWidget;
-
-    QVBoxLayout* layout = new QVBoxLayout;
+    QWidget* localhostWidget = new QWidget;
+    QVBoxLayout* localhostLayout = new QVBoxLayout;
     for (const NetworkInterface& iface : NetworkInterface::all()){
-        QWidget* ifaceWidget = createNetworkCardWidget(iface, widget);
-        layout->addWidget(ifaceWidget);
+        QWidget* ifaceWidget = createNetworkCardWidget(iface, localhostWidget);
+        localhostLayout->addWidget(ifaceWidget);
         ifaceWidget->show();
     };
-    widget->setLayout(layout);
-    widget->show();
+    localhostWidget->setLayout(localhostLayout);
+    localhostWidget->show();
+    QScrollArea* localhostScrollArea = new QScrollArea;
+    localhostScrollArea->setWidget(localhostWidget);
 
+    networkScanWidget = new QWidget;
+    networkScanLayout = new QVBoxLayout;
 
-    QScrollArea* scrollArea = new QScrollArea;
-    scrollArea->setWidget(widget);
-
-    QTabWidget* tabWidget = new QTabWidget(this);
-    tabWidget->addTab(scrollArea, "Localhost");
-    tabWidget->addTab(whoIsWidget, "Who is");
-    tabWidget->addTab(speedTestWidget, "Speed Test");
+    field = new QTextEdit;
+    field->setFixedHeight(26);
+    QPushButton* button = new QPushButton;
+    button->setText("Przeskanuj otwarte porty");
+            connect(button, SIGNAL (clicked()),this, SLOT (handleClick()));
+    networkScanLayout->addWidget(field);
+    networkScanLayout->addWidget(button);
+    networkScanWidget->setLayout(networkScanLayout);
+    networkScanWidget->setFixedHeight(500);
+    networkScanWidget->show();
+    networkScanScrollArea = new QScrollArea;
+    networkScanScrollArea->setWidget(networkScanWidget);
+    tabWidget = new QTabWidget(this);
+    tabWidget->addTab(localhostScrollArea, "Lokalne interfejsy sieciowe");
+    tabWidget->addTab(networkScanScrollArea, "Skan hosta");
     tabWidget->show();
 
     this->setCentralWidget(tabWidget);
@@ -75,4 +88,37 @@ QWidget* MainWindow::createNetworkCardWidget(NetworkInterface iface, QWidget* pa
 
     widget->setLayout(layout);
     return widget;
+}
+
+void MainWindow::handleClick(){
+    std::string fieldValue = field->toPlainText().toStdString();
+    QLabel* label = new QLabel;
+    try {
+        Host* host = new Host(IPv4Address(fieldValue));
+        host->scan_ports({});
+        std::vector<int> ports = host->getPorts();
+        std::string labelText = "Adres hosta: ";
+        labelText += host->getIp().to_string();
+        labelText += "\nSystem operacyjny: ";
+        labelText += host->getOs();
+        labelText += "\nAdres MAC: ";
+        labelText += host->getMac().to_string();
+        labelText += "\nAktywny w sieci: ";
+        if(host->getActive()){
+            labelText += "tak";
+        }else{
+            labelText += "nie";
+        }
+        labelText += "\nOtwarte porty:";
+        for (const int port : ports) {
+            labelText+=std::to_string(port);
+            labelText+=", ";
+        }
+        label->setText(QString::fromStdString(labelText));
+        networkScanLayout->addWidget(label);
+        networkScanWidget->setLayout(networkScanLayout);
+        networkScanWidget->show();
+    } catch (Tins::invalid_address) {
+        field->setText("Niepoprawny adres");
+    }
 }
